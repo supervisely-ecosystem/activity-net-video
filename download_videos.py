@@ -1,12 +1,13 @@
-import pytube
+import pytube, time
 import urllib.request, json
 from multiprocessing import Pool
 import pytube.exceptions as exceptions
 import supervisely_lib as sly
 from supervisely_lib.io.fs import mkdir
+import tqdm
 
 
-work_dir = '/home/andrew/alex_work/app_cache/videos_tube'
+work_dir = '/home/andrew/alex_work/app_cache/videos_tube2'
 mkdir(work_dir, True)
 annotations_json = 'http://ec2-52-25-205-214.us-west-2.compute.amazonaws.com/files/activity_net.v1-3.min.json'
 logger = sly.logger
@@ -21,6 +22,9 @@ def download_from_youtube(url):
     except exceptions.VideoUnavailable:
         logger.info('{} video is unavailable'.format(url))
         video_unavailable += 1
+    except KeyError:
+        logger.info('{} bitrate error'.format(url))
+        time.sleep(1)
 
 
 if __name__ == '__main__':
@@ -38,7 +42,10 @@ if __name__ == '__main__':
             curr_url = curr_video_data['url']
             urls.append(curr_url)
 
+    urls = urls[2434:5000]
     with Pool() as p:
         p.map(download_from_youtube, urls)
+        # for do_work_return in tqdm.tqdm(p.map(download_from_youtube, urls), total=len(urls)):
+        #     pass
 
     logger.info('{} videos was unavailable'.format(video_unavailable))

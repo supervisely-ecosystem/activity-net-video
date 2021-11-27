@@ -17,6 +17,7 @@ annotations_json = 'http://ec2-52-25-205-214.us-west-2.compute.amazonaws.com/fil
 
 logger = sly.logger
 batch_size = 10
+tag_value = 'True'
 
 work_dir = '/home/andrew/alex_work/app_cache/videos_tube'
 
@@ -95,7 +96,7 @@ for videos_batch in sly.batched(videos, batch_size=batch_size):
 
         for tag_name, frames_ranges in tags_with_frames.items():
             if meta.get_tag_meta(tag_name) is None:
-                tag_meta = sly.TagMeta(tag_name, sly.TagValueType.NONE)
+                tag_meta = sly.TagMeta(tag_name, sly.TagValueType.ANY_STRING)
                 tag_collection = sly.TagMetaCollection([tag_meta])
                 new_meta = sly.ProjectMeta(tag_metas=tag_collection)
                 meta = meta.merge(new_meta)
@@ -110,11 +111,11 @@ for videos_batch in sly.batched(videos, batch_size=batch_size):
 
             if len(result_frames_idxs) == 1 and result_frames_idxs[0][0] == 0 and result_frames_idxs[0][1] == len(
                     file_infos[idx].frames_to_timecodes) - 1:
-                tag = VideoTag(tag_meta)
+                tag = VideoTag(tag_meta, tag_value)
                 curr_tags.append(tag)
             else:
                 for frames_indexs in result_frames_idxs:
-                    tag = VideoTag(tag_meta, frame_range=frames_indexs)
+                    tag = VideoTag(tag_meta, value=tag_value, frame_range=frames_indexs)
                     curr_tags.append(tag)
 
         tag_collection = VideoTagCollection(curr_tags)
